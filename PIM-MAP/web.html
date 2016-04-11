@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+
+
+  
+
+<script type="text/javascript" src="dijkstra.js"></script>
+  <script type="text/javascript">
+	
+
+
+  	var NUMBER_EDGES = 4;
+    var SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg";
+    var nodes = Array();
+    var nodesBuatan = [ {'cx':"500" ,'cy':"90"},
+						{'cx':"163" ,'cy':"100"},
+            {'cx':"79" ,'cy':"534"}, 
+            {'cx':"400" ,'cy':"21"}, 
+            {'cx':"300" ,'cy':"60"}
+						]; 
+    var adjacencyMatrix = new Array(nodesBuatan.length);
+
+
+    function init() {
+      // Create randomly positioned nodes
+      for (var i = 0; i < nodesBuatan.length;i++) {
+        var newNode = { };
+		newNode.x = nodesBuatan[i].cx;
+		newNode.y = nodesBuatan[i].cy;
+        nodes.push(newNode);
+      }
+
+       // Initialize an adjacency matrix
+      for (var i = 0; i < nodesBuatan.length; i++) {
+        adjacencyMatrix[i] = new Array(nodesBuatan.length);
+        for (var j = 0; j < nodesBuatan.length; j++) {
+          adjacencyMatrix[i][j] = Infinity;
+        }
+      }
+
+
+
+      // // Create some edges and add them to the document
+      // for (var j = 0; j < NUMBER_EDGES; j++) {
+      //   var from = j % nodesBuatan.length;
+      //   console.log("from : "+ from);
+      //   var min = Infinity;
+      //   var to = from;
+      //   for (var i = 0; i < nodesBuatan.length; i++) {
+      //     if (from != i && adjacencyMatrix[from][i] == Infinity) {
+      //       var dx = nodes[from].x - nodes[i].x;
+      //       var dy = nodes[from].y - nodes[i].y;
+      //       var distance = Math.sqrt(dx * dx + dy * dy);
+      //       if (distance < min) {
+      //         min = distance;
+      //         to = i;
+      //       }
+      //     }
+      //   }
+      //   adjacencyMatrix[from][to] = min;
+      //   adjacencyMatrix[to][from] = min;
+      //   var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+      //   var id = "l";
+      //   if (to < from) {
+      //     id += String(to) + from;
+      //   } else {
+      //     id += String(from) + to;
+      //   }
+      //   l.setAttributeNS(null, "id", id);
+      //   l.setAttributeNS(null, "x1", nodes[from].x);
+      //   l.setAttributeNS(null, "y1", nodes[from].y);
+      //   l.setAttributeNS(null, "x2", nodes[to].x);
+      //   l.setAttributeNS(null, "y2", nodes[to].y);
+      //   document.getElementById("mysvg").appendChild(l);
+      // }
+
+      for (var i = 0; i < nodesBuatan.length; i++) {
+        from = i;
+        to = from+1;
+        if (to == nodesBuatan.length) { to=0; }
+
+        var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+        l.setAttributeNS(null, "id", 'l'+ from + to);
+        l.setAttributeNS(null, "x1", nodesBuatan[from].cx);
+        l.setAttributeNS(null, "y1", nodesBuatan[from].cy);
+        l.setAttributeNS(null, "x2", nodesBuatan[to].cx);
+        l.setAttributeNS(null, "y2", nodesBuatan[to].cy);
+        var dx = nodesBuatan[from].cx - nodesBuatan[to].cx;
+        var dy = nodesBuatan[from].cy - nodesBuatan[to].cy;
+        var min = Math.sqrt(dx * dx + dy * dy);
+        adjacencyMatrix[from][to] = min;
+        document.getElementById("mysvg").appendChild(l);
+
+        var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+        l.setAttributeNS(null, "id", 'l'+ to + from);
+        l.setAttributeNS(null, "x1", nodesBuatan[to].cx);
+        l.setAttributeNS(null, "y1", nodesBuatan[to].cy);
+        l.setAttributeNS(null, "x2", nodesBuatan[from].cx);
+        l.setAttributeNS(null, "y2", nodesBuatan[from].cy);
+        var dx = nodesBuatan[from].cx - nodesBuatan[to].cx;
+        var dy = nodesBuatan[from].cy - nodesBuatan[to].cy;
+        var min = Math.sqrt(dx * dx + dy * dy);
+        adjacencyMatrix[to][from] = min;
+        document.getElementById("mysvg").appendChild(l);
+
+      }
+
+      // var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+      // l.setAttributeNS(null, "id", 'l01');
+      // l.setAttributeNS(null, "x1", 500);
+      // l.setAttributeNS(null, "y1", 90);
+      // l.setAttributeNS(null, "x2", 79);
+      // l.setAttributeNS(null, "y2", 534);
+      // var dx = 500 - 79;
+      // var dy = 90 - 534;
+      // var min = Math.sqrt(dx * dx + dy * dy);
+      // adjacencyMatrix[0][1] = min;
+      // document.getElementById("mysvg").appendChild(l);
+
+      // var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+      // l.setAttributeNS(null, "id", 'l10');
+      // l.setAttributeNS(null, "x1", 79);
+      // l.setAttributeNS(null, "y1", 534);
+      // l.setAttributeNS(null, "x2", 500);
+      // l.setAttributeNS(null, "y2", 90);
+      // var dx = 500 - 79;
+      // var dy = 90 - 534;
+      // var min = Math.sqrt(dx * dx + dy * dy);
+      // adjacencyMatrix[1][0] = min;
+      // document.getElementById("mysvg").appendChild(l);
+
+
+
+      // var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+      // l.setAttributeNS(null, "id", 'l12');
+      // l.setAttributeNS(null, "x1", 79);
+      // l.setAttributeNS(null, "y1", 534);
+      // l.setAttributeNS(null, "x2", 163);
+      // l.setAttributeNS(null, "y2", 100);
+      // var dx = 79 - 163;
+      // var dy = 534 - 100;
+      // var min = Math.sqrt(dx * dx + dy * dy);
+      // adjacencyMatrix[1][2] = min;
+      // document.getElementById("mysvg").appendChild(l);
+
+      // var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+      // l.setAttributeNS(null, "id", 'l21');
+      // l.setAttributeNS(null, "x1", 163);
+      // l.setAttributeNS(null, "y1", 100);
+      // l.setAttributeNS(null, "x2", 79);
+      // l.setAttributeNS(null, "y2", 534);
+      // var dx = 79 - 163;
+      // var dy = 534 - 100;
+      // var min = Math.sqrt(dx * dx + dy * dy);
+      // adjacencyMatrix[2][1] = min;
+      // document.getElementById("mysvg").appendChild(l);
+
+
+
+
+      // var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+      // l.setAttributeNS(null, "id", 'l23');
+      // l.setAttributeNS(null, "x1", 163);
+      // l.setAttributeNS(null, "y1", 100);
+      // l.setAttributeNS(null, "x2", 300);
+      // l.setAttributeNS(null, "y2", 60);
+      // var dx = 163 - 100;
+      // var dy = 300 - 60;
+      // var min = Math.sqrt(dx * dx + dy * dy);
+      // adjacencyMatrix[2][3] = min;
+      // document.getElementById("mysvg").appendChild(l);
+
+
+      // var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+      // l.setAttributeNS(null, "id", 'l32');
+      // l.setAttributeNS(null, "x1", 300);
+      // l.setAttributeNS(null, "y1", 60);
+      // l.setAttributeNS(null, "x2", 163);
+      // l.setAttributeNS(null, "y2", 100);
+      // var dx = 163 - 100;
+      // var dy = 300 - 60;
+      // var min = Math.sqrt(dx * dx + dy * dy);
+      // adjacencyMatrix[3][2] = min;
+      // document.getElementById("mysvg").appendChild(l);
+
+
+
+      // var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+      // l.setAttributeNS(null, "id", 'l30');
+      // l.setAttributeNS(null, "x1", 300);
+      // l.setAttributeNS(null, "y1", 60);
+      // l.setAttributeNS(null, "x2", 500);
+      // l.setAttributeNS(null, "y2", 90);
+      // var dx = 300 - 60;
+      // var dy = 90 - 90;
+      // var min = Math.sqrt(dx * dx + dy * dy);
+      // adjacencyMatrix[3][0] = min;
+      // document.getElementById("mysvg").appendChild(l);
+
+      // var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+      // l.setAttributeNS(null, "id", 'l03');
+      // l.setAttributeNS(null, "x1", 500);
+      // l.setAttributeNS(null, "y1", 90);
+      // l.setAttributeNS(null, "x2", 300);
+      // l.setAttributeNS(null, "y2", 60);
+      // var dx = 300 - 60;
+      // var dy = 90 - 90;
+      // var min = Math.sqrt(dx * dx + dy * dy);
+      // adjacencyMatrix[0][3] = min;
+      // document.getElementById("mysvg").appendChild(l);
+
+
+
+      divider = document.createElementNS(SVG_NAMESPACE_URI, "g");
+      document.getElementById("mysvg").appendChild(divider);
+  
+      // Add the circles for the nodes
+      for (var i = 0; i < nodesBuatan.length; i++) {
+        var c = document.createElementNS(SVG_NAMESPACE_URI, "circle");
+        c.setAttributeNS(null, "id", "c" + i);
+        c.setAttributeNS(null, "cx", nodes[i].x);
+        c.setAttributeNS(null, "cy", nodes[i].y);
+        c.setAttributeNS(null, "r", 7);
+
+        c.setAttributeNS(null, "onmouseover", "showPath(" + i + ")");
+        c.setAttributeNS(null, "onmouseout", "hidePath(" + i + ")");
+        c.setAttributeNS(null, "onclick", "setActive(" + i + ")");
+        document.getElementById("mysvg").appendChild(c);
+      }
+  
+      // Start with node 0 as the active node
+      activeNode = 0;
+      document.getElementById("c0").setAttributeNS(null, "class", "current");
+      shortestPathInfo = shortestPath(adjacencyMatrix, nodesBuatan.length, 0);
+      console.log(adjacencyMatrix);
+    }
+
+     // Hide the path highlights
+    function clearPath() {
+      for (var i = 0; i < nodesBuatan.length; i++) {
+        for (var j = i + 1; j < nodesBuatan.length; j++) {
+          if (adjacencyMatrix[i][j] != Infinity) {
+            document.getElementById("l" + i + j).setAttributeNS(null, "class", "");
+          }
+        }
+      }
+    }
+
+    // Show path from the active node to the given node
+    function showPath(to) {
+      clearPath();
+      if (activeNode != to) {
+        var c = document.getElementById("c" + to);
+        //c.setAttributeNS(null, "class", "highlight");
+        //var path = constructPath(shortestPathInfo, to);
+        var path = constructPathBODZ(shortestPathInfo, to);
+
+        console.log(path);
+        var prev = activeNode;
+        var distance = 0;
+
+        var directline = "m "+ nodesBuatan[0].cx + " " + nodesBuatan[0].cy + " ";
+        var oldx = nodesBuatan[0].cx;
+        var oldy = nodesBuatan[0].cy;
+
+        for (var i = 0; i < path.length; i++) {
+    			var id;
+    			if (path[i] < prev) {
+    				id = "l" + path[i] + prev;
+    			} else {
+    				id = "l" + prev + path[i];
+    			}
+
+    			var l = document.getElementById(id);
+    			l.parentNode.removeChild(l);
+    			l.setAttributeNS(null, "class", "highlight");
+    			document.getElementById("mysvg").insertBefore(l, divider);
+    			distance += adjacencyMatrix[prev][path[i]];
+    			prev = path[i];
+
+    			directline = directline + "l " + (nodesBuatan[path[i]].cx - oldx) + " " + (nodesBuatan[path[i]].cy - oldy) + " ";
+    			oldx = nodesBuatan[path[i]].cx;
+    			oldy = nodesBuatan[path[i]].cy;
+          //create red path
+          	 
+        }
+        //console.log(distance);
+        //console.log(directline);
+        
+
+        document.getElementById("sipath").setAttributeNS(null, "d", directline);
+        
+        //set kecepatan
+        var waktu = distance/100;
+        console.log(waktu);
+        document.getElementById("myanimation").setAttributeNS(null, "dur", waktu);
+        document.getElementById("myanimation").beginElement();
+        
+      }
+    }
+
+    // Unhighlight the path from the active node to the given node
+    function hidePath(to) {
+      //clearPath();
+      if (activeNode != to) {
+        var c = document.getElementById("c" + to);
+        c.setAttributeNS(null, "class", "");
+      }
+    }
+
+    // Choose a new active node
+    function setActive(to) {
+      //document.getElementById("c" + activeNode).setAttributeNS(null, "class", "");
+      //clearPath();
+      //activeNode = to;
+      //shortestPathInfo = shortestPath(adjacencyMatrix, nodesBuatan.length, to);
+      //document.getElementById("c" + activeNode).setAttributeNS(null, "class", "current");
+    }
+    function cry(){
+      alert("kuple");
+    };
+  </script>
+
+
+</head>
+<body>
+
+
+<style type="text/css">
+    circle {
+      fill: CornflowerBlue;
+      stroke-width: 2;
+      stroke: MidnightBlue;
+    }
+    circle.current {
+      fill: OrangeRed;
+      stroke: Firebrick;
+    }
+    circle.highlight {
+      fill: GreenYellow;
+      stroke: green;
+    }
+    line {
+      stroke-width: 2;
+      stroke: black;
+    }
+    line.highlight {
+      stroke-width: 4;
+      stroke: IndianRed;
+    }
+
+    .wrapper{width: 100%;float:left;background-color: #eee;padding: 20px;}
+    .right-container{float:left;width: 25%;}
+    .left-container{float:left;width: 75%}
+  </style>
+
+<div class="wrapper">
+	<div class="left-container">
+		<svg xmlns="http://www.w3.org/2000/svg" id="mysvg" viewBox="0 0 1000 600" onload="init()" style="width:100%;height:100%;top:0;left:0;bottom:0;right:0;">
+			<image xlink:href="pin.png" x="0" y="-60" height="50" width="50" >
+				<animateMotion id="myanimation" calcMode="linear" dur="5s" repeatCount="1" fill="freeze" onEnd="cry()">
+					<mpath id="jalur" xlink:href="#sipath"/>
+				</animateMotion>
+			</image>  
+		  <rect x="0" y="0"  fill="white"/>
+		  
+		  <path id="sipath" d="" fill="none"/>
+
+		 
+
+		</svg>
+	</div>
+	<div class="right-container">
+		<ul>
+			<li> <button onclick="showPath(3)">toilet</button></li>
+			<li> <button onclick="showPath(2)">exit</button></li>
+		</ul>
+	</div>
+</div>
+
+
+
+
+
+
+
+
+
+</body>
+</html>

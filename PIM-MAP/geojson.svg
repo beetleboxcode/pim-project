@@ -1,0 +1,252 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 800 600" onload="init()">
+
+  <title id="title">Demonstration of Dijkstra's shortest path algorithm</title>
+
+  <script type="text/ecmascript" xlink:href="dijkstra.js"/>
+  <html:div xmlns:html="http://www.w3.org/1999/xhtml" id="_firebugConsole" style="display: none;" FirebugVersion="1.4X.2"></html:div>
+  <script type="text/ecmascript"><![CDATA[
+    var NUMBER_NODES = 20;
+    var NUMBER_EDGES = 40;
+
+    var SVG_NAMESPACE_URI = "http://www.w3.org/2000/svg";
+
+    var nodes = new Array();
+    var adjacencyMatrix = new Array(NUMBER_NODES);
+
+    function init() {
+      // Create randomly positioned nodes
+      for (var i = 0; i < NUMBER_NODES; ]]><![CDATA[i++) {
+        var newNode = { };
+        var again;
+        do {
+          again = false;
+          newNode.x = 700 * Math.random() + 50;
+          newNode.y = 470 * Math.random() + 80;
+          // Make sure they aren't too close together
+          for (var j = 0; j < i; j++) {
+            var dx = newNode.x - nodes[j].x;
+            var dy = newNode.y - nodes[j].y;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 45) {
+              again = true;
+              break;
+            }
+          }
+        } while (again);
+        nodes.push(newNode);
+      }
+  
+      // Initialize an adjacency matrix
+      for (var i = 0; i < NUMBER_NODES; i++) {
+        adjacencyMatrix[i] = new Array(NUMBER_NODES);
+        for (var j = 0; j < NUMBER_NODES; j++) {
+          adjacencyMatrix[i][j] = Infinity;
+        }
+      }
+  
+      // Create some edges and add them to the document
+      for (var j = 0; j < NUMBER_EDGES; j++) {
+        var from = j % NUMBER_NODES;
+        var min = Infinity;
+        var to = from;
+        for (var i = 0; i < NUMBER_NODES; i++) {
+          if (from != i && adjacencyMatrix[from][i] == Infinity) {
+            var dx = nodes[from].x - nodes[i].x;
+            var dy = nodes[from].y - nodes[i].y;
+            var distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < min) {
+              min = distance;
+              to = i;
+            }
+          }
+        }
+        adjacencyMatrix[from][to] = min;
+        adjacencyMatrix[to][from] = min;
+  
+        var l = document.createElementNS(SVG_NAMESPACE_URI, "line");
+        var id = "l";
+        if (to < from) {
+          id += String(to) + from;
+        } else {
+          id += String(from) + to;
+        }
+        l.setAttributeNS(null, "id", id);
+        l.setAttributeNS(null, "x1", nodes[from].x);
+        l.setAttributeNS(null, "y1", nodes[from].y);
+        l.setAttributeNS(null, "x2", nodes[to].x);
+        l.setAttributeNS(null, "y2", nodes[to].y);
+        document.documentElement.appendChild(l);
+      }
+  
+      divider = document.createElementNS(SVG_NAMESPACE_URI, "g");
+      document.documentElement.appendChild(divider);
+  
+      // Add the circles for the nodes
+      for (var i = 0; i < NUMBER_NODES; i++) {
+        var c = document.createElementNS(SVG_NAMESPACE_URI, "circle");
+        c.setAttributeNS(null, "id", "c" + i);
+        c.setAttributeNS(null, "cx", nodes[i].x);
+        c.setAttributeNS(null, "cy", nodes[i].y);
+        c.setAttributeNS(null, "r", 20);
+        c.setAttributeNS(null, "onmouseover", "showPath(" + i + ")");
+        c.setAttributeNS(null, "onmouseout", "hidePath(" + i + ")");
+        c.setAttributeNS(null, "onclick", "setActive(" + i + ")");
+        document.documentElement.appendChild(c);
+      }
+  
+      // Start with node 0 as the active node
+      activeNode = 0;
+      document.getElementById("c0").setAttributeNS(null, "class", "current");
+      shortestPathInfo = shortestPath(adjacencyMatrix, NUMBER_NODES, 0);
+    }
+
+    // Hide the path highlights
+    function clearPath() {
+      for (var i = 0; i < NUMBER_NODES; i++) {
+        for (var j = i + 1; j < NUMBER_NODES; j++) {
+          if (adjacencyMatrix[i][j] != Infinity) {
+            document.getElementById("l" + i + j)
+                    .setAttributeNS(null, "class", "");
+          }
+        }
+      }
+    }
+
+    // Show path from the active node to the given node
+    function showPath(to) {
+      clearPath();
+      if (activeNode != to) {
+        var c = document.getElementById("c" + to);
+        c.setAttributeNS(null, "class", "highlight");
+        var path = constructPath(shortestPathInfo, to);
+        var prev = activeNode;
+        var distance = 0;
+        for (var i = 0; i < path.length; i++) {
+          var id;
+          if (path[i] < prev) {
+            id = "l" + path[i] + prev;
+          } else {
+            id = "l" + prev + path[i];
+          }
+          var l = document.getElementById(id);
+          l.parentNode.removeChild( l);
+          l.setAttributeNS(null, "class", "highlight");
+          document.documentElement.insertBefore(l, divider);
+          distance += adjacencyMatrix[prev][path[i]];
+          prev = path[i];
+        }
+        document.getElementById("d").firstChild.nodeValue =
+          "Distance: " + distance;
+      }
+    }
+
+    // Unhighlight the path from the active node to the given node
+    function hidePath(to) {
+      clearPath();
+      if (activeNode != to) {
+        var c = document.getElementById("c" + to);
+        c.setAttributeNS(null, "class", "");
+      }
+    }
+
+    // Choose a new active node
+    function setActive(to) {
+      document.getElementById("c" + activeNode)
+              .setAttributeNS(null, "class", "");
+      clearPath();
+      activeNode = to;
+      shortestPathInfo = shortestPath(adjacencyMatrix, NUMBER_NODES, to);
+      document.getElementById("c" + activeNode)
+              .setAttributeNS(null, "class", "current");
+    }
+  ]]></script>
+
+  <style type="text/css">
+    circle {
+      fill: CornflowerBlue;
+      stroke-width: 2;
+      stroke: MidnightBlue;
+    }
+    circle.current {
+      fill: OrangeRed;
+      stroke: Firebrick;
+    }
+    circle.highlight {
+      fill: GreenYellow;
+      stroke: green;
+    }
+    line {
+      stroke-width: 2;
+      stroke: black;
+    }
+    line.highlight {
+      stroke-width: 4;
+      stroke: IndianRed;
+    }
+  </style>
+
+  <rect x="-100%" y="-100%" width="300%" height="300%" fill="PaleGoldenrod"/>
+  
+  <line id="l018" x1="454.1350936051458" y1="311.6155173606239" x2="385.8916975092143" y2="312.19006987055764" class=""/>
+  <line id="l119" x1="79.0774705586955" y1="534.4188312557526" x2="114.94231128599495" y2="485.52677681669593" class=""/>
+  <line id="l219" x1="163.820388331078" y1="524.3382561067119" x2="114.94231128599495" y2="485.52677681669593" class=""/>
+  <line id="l314" x1="366.1456224974245" y1="493.5634808335453" x2="367.84726618789136" y2="416.04076334740967" class=""/>
+  <line id="l415" x1="572.1882070181891" y1="292.47532185865566" x2="576.4495527837425" y2="236.18671145057306" class=""/>
+  <line id="l619" x1="136.3245220389217" y1="361.5741555718705" x2="114.94231128599495" y2="485.52677681669593" class=""/>
+  <line id="l47" x1="607.4837427819148" y1="403.97411645390093" x2="572.1882070181891" y2="292.47532185865566" class=""/>
+  <line id="l812" x1="455.73361518327147" y1="391.80606226669624" x2="404.4514501001686" y2="389.649532425683" class=""/>
+  <line id="l49" x1="512.5179888913408" y1="268.44286173116416" x2="572.1882070181891" y2="292.47532185865566" class=""/>
+  <line id="l1011" x1="338.3199977921322" y1="101.1260008928366" x2="363.9518480049446" y2="263.51013083709404" class=""/>
+  <line id="l1118" x1="363.9518480049446" y1="263.51013083709404" x2="385.8916975092143" y2="312.19006987055764" class=""/>
+  <line id="l1214" x1="404.4514501001686" y1="389.649532425683" x2="367.84726618789136" y2="416.04076334740967" class=""/>
+  <line id="l513" x1="703.6932237679139" y1="93.35811244091019" x2="612.3954679816961" y2="175.03600802039728" class=""/>
+  <line id="l814" x1="367.84726618789136" y1="416.04076334740967" x2="455.73361518327147" y2="391.80606226669624" class=""/>
+  <line id="l915" x1="576.4495527837425" y1="236.18671145057306" x2="512.5179888913408" y2="268.44286173116416" class=""/>
+  <line id="l1617" x1="192.98397975508124" y1="191.64139543194324" x2="138.94266372080892" y2="160.6594142387621" class=""/>
+  <line id="l617" x1="138.94266372080892" y1="160.6594142387621" x2="136.3245220389217" y2="361.5741555718705" class=""/>
+  <line id="l1218" x1="385.8916975092143" y1="312.19006987055764" x2="404.4514501001686" y2="389.649532425683" class=""/>
+  <line id="l319" x1="114.94231128599495" y1="485.52677681669593" x2="366.1456224974245" y2="493.5634808335453" class=""/>
+  <line id="l12" x1="79.0774705586955" y1="534.4188312557526" x2="163.820388331078" y2="524.3382561067119" class=""/>
+  <line id="l26" x1="163.820388331078" y1="524.3382561067119" x2="136.3245220389217" y2="361.5741555718705" class=""/>
+  <line id="l312" x1="366.1456224974245" y1="493.5634808335453" x2="404.4514501001686" y2="389.649532425683" class=""/>
+  <line id="l04" x1="572.1882070181891" y1="292.47532185865566" x2="454.1350936051458" y2="311.6155173606239" class=""/>
+  <line id="l45" x1="612.3954679816961" y1="175.03600802039728" x2="572.1882070181891" y2="292.47532185865566" class=""/>
+  <line id="l616" x1="136.3245220389217" y1="361.5741555718705" x2="192.98397975508124" y2="191.64139543194324" class=""/>
+  <line id="l78" x1="607.4837427819148" y1="403.97411645390093" x2="455.73361518327147" y2="391.80606226669624" class=""/>
+  <line id="l08" x1="455.73361518327147" y1="391.80606226669624" x2="454.1350936051458" y2="311.6155173606239" class=""/>
+  <line id="l918" x1="512.5179888913408" y1="268.44286173116416" x2="385.8916975092143" y2="312.19006987055764" class=""/>
+  <line id="l1016" x1="338.3199977921322" y1="101.1260008928366" x2="192.98397975508124" y2="191.64139543194324" class=""/>
+  <line id="l012" x1="404.4514501001686" y1="389.649532425683" x2="454.1350936051458" y2="311.6155173606239" class=""/>
+  <line id="l1418" x1="367.84726618789136" y1="416.04076334740967" x2="385.8916975092143" y2="312.19006987055764" class=""/>
+  <line id="l1116" x1="192.98397975508124" y1="191.64139543194324" x2="363.9518480049446" y2="263.51013083709404" class=""/>
+  <line id="l1017" x1="138.94266372080892" y1="160.6594142387621" x2="338.3199977921322" y2="101.1260008928366" class=""/>
+  <line id="l818" x1="385.8916975092143" y1="312.19006987055764" x2="455.73361518327147" y2="391.80606226669624" class=""/>
+  <line id="l1419" x1="114.94231128599495" y1="485.52677681669593" x2="367.84726618789136" y2="416.04076334740967" class=""/>
+  <line id="l011" x1="363.9518480049446" y1="263.51013083709404" x2="454.1350936051458" y2="311.6155173606239" class=""/>
+  <line id="l09" x1="454.1350936051458" y1="311.6155173606239" x2="512.5179888913408" y2="268.44286173116416" class=""/>
+  <line id="l515" x1="612.3954679816961" y1="175.03600802039728" x2="576.4495527837425" y2="236.18671145057306" class=""/>
+  <line id="l015" x1="576.4495527837425" y1="236.18671145057306" x2="454.1350936051458" y2="311.6155173606239" class=""/>
+  <line id="l1315" x1="703.6932237679139" y1="93.35811244091019" x2="576.4495527837425" y2="236.18671145057306" class=""/>
+<g/>
+
+  <circle id="c0" cx="454.1350936051458" cy="311.6155173606239" r="20" onmouseover="showPath(0)" onmouseout="hidePath(0)" onclick="setActive(0)" class="current"/>
+  <circle id="c1" cx="79.0774705586955" cy="534.4188312557526" r="20" onmouseover="showPath(1)" onmouseout="hidePath(1)" onclick="setActive(1)"/>
+  <circle id="c2" cx="163.820388331078" cy="524.3382561067119" r="20" onmouseover="showPath(2)" onmouseout="hidePath(2)" onclick="setActive(2)"/>
+  <circle id="c3" cx="366.1456224974245" cy="493.5634808335453" r="20" onmouseover="showPath(3)" onmouseout="hidePath(3)" onclick="setActive(3)"/>
+  <circle id="c4" cx="572.1882070181891" cy="292.47532185865566" r="20" onmouseover="showPath(4)" onmouseout="hidePath(4)" onclick="setActive(4)"/>
+  <circle id="c5" cx="612.3954679816961" cy="175.03600802039728" r="20" onmouseover="showPath(5)" onmouseout="hidePath(5)" onclick="setActive(5)" class=""/>
+  <circle id="c6" cx="136.3245220389217" cy="361.5741555718705" r="20" onmouseover="showPath(6)" onmouseout="hidePath(6)" onclick="setActive(6)"/>
+  <circle id="c7" cx="607.4837427819148" cy="403.97411645390093" r="20" onmouseover="showPath(7)" onmouseout="hidePath(7)" onclick="setActive(7)"/>
+  <circle id="c8" cx="455.73361518327147" cy="391.80606226669624" r="20" onmouseover="showPath(8)" onmouseout="hidePath(8)" onclick="setActive(8)"/>
+  <circle id="c9" cx="512.5179888913408" cy="268.44286173116416" r="20" onmouseover="showPath(9)" onmouseout="hidePath(9)" onclick="setActive(9)" class=""/>
+  <circle id="c10" cx="338.3199977921322" cy="101.1260008928366" r="20" onmouseover="showPath(10)" onmouseout="hidePath(10)" onclick="setActive(10)"/>
+  <circle id="c11" cx="363.9518480049446" cy="263.51013083709404" r="20" onmouseover="showPath(11)" onmouseout="hidePath(11)" onclick="setActive(11)" class=""/>
+  <circle id="c12" cx="404.4514501001686" cy="389.649532425683" r="20" onmouseover="showPath(12)" onmouseout="hidePath(12)" onclick="setActive(12)"/>
+  <circle id="c13" cx="703.6932237679139" cy="93.35811244091019" r="20" onmouseover="showPath(13)" onmouseout="hidePath(13)" onclick="setActive(13)" class=""/>
+  <circle id="c14" cx="367.84726618789136" cy="416.04076334740967" r="20" onmouseover="showPath(14)" onmouseout="hidePath(14)" onclick="setActive(14)"/>
+  <circle id="c15" cx="576.4495527837425" cy="236.18671145057306" r="20" onmouseover="showPath(15)" onmouseout="hidePath(15)" onclick="setActive(15)" class=""/>
+  <circle id="c16" cx="192.98397975508124" cy="191.64139543194324" r="20" onmouseover="showPath(16)" onmouseout="hidePath(16)" onclick="setActive(16)"/>
+  <circle id="c17" cx="138.94266372080892" cy="160.6594142387621" r="20" onmouseover="showPath(17)" onmouseout="hidePath(17)" onclick="setActive(17)"/>
+  <circle id="c18" cx="385.8916975092143" cy="312.19006987055764" r="20" onmouseover="showPath(18)" onmouseout="hidePath(18)" onclick="setActive(18)"/>
+  <circle id="c19" cx="114.94231128599495" cy="485.52677681669593" r="20" onmouseover="showPath(19)" onmouseout="hidePath(19)" onclick="setActive(19)"/>
+</svg>
