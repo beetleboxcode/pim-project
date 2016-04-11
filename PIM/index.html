@@ -1,0 +1,176 @@
+<!doctype html>
+<html>
+<head>
+	<title>Kiosk</title>
+
+	<link rel="stylesheet" type="text/css" href="libs/swiper.css">
+	<style type="text/css">
+	html{cursor: none;margin: none;padding: none;overflow: none}
+		.slider{
+		    width:100%;
+		    overflow:hidden;
+		    position:relative;
+		    margin:0;
+		}
+		.edge{
+		    left:0;
+		    right:0;
+		    top:0;
+		    bottom:0;
+		    position:absolute;
+		    height:100%;
+		    display:block;
+		}
+		.edge:before{
+		    content:'';
+		    position:absolute;
+		    left:0;
+		    background:-webkit-linear-gradient(left, white 10%, rgba(0,0,0,0) 100%);
+		    width:25%;
+		    height:100%;
+		}
+		.edge:after{
+		    content:'';
+		    position:absolute;
+		    right:0;
+		    background:-webkit-linear-gradient(right, white 10%, rgba(0,0,0,0) 100%);
+		    width:25%;
+		    height:100%;
+		}
+		ul{
+		    background:#ddd;
+		    overflow:hidden;
+		    width:1000%;
+		    margin:0;
+		}
+		li{
+		    list-style:none;
+		    display:inline-block;
+		    padding:0 50px;
+		}
+
+	    .swiper-container {
+        width: 100%;
+    }
+    .swiper-slide {
+        text-align: center;
+        font-size: 18px;
+        background: #fff;
+        
+        /* Center slide text vertically */
+        display: -webkit-box;
+        display: -ms-flexbox;
+        display: -webkit-flex;
+        display: flex;
+        -webkit-box-pack: center;
+        -ms-flex-pack: center;
+        -webkit-justify-content: center;
+        justify-content: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+    }
+
+    .video-wrapper{width: 100%;float:left;}
+    .video-container{width: 100%; margin: auto}
+    #TVC{width: 100%;}
+    .swiper-slide img{width: 100%}
+	</style>
+</head>
+<body>
+
+<div class="video-wrapper">
+	<div class="video-container">
+		<video id="TVC" src="video/3.webm" autoplay autobuffer muted></video>
+	</div>
+</div>
+
+
+ <div class="swiper-container">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide"><img src="images/1.jpg"></div>
+            <div class="swiper-slide"><img src="images/2.jpg"></div>
+            <div class="swiper-slide"><img src="images/3.jpg"></div>
+        </div>
+    </div>
+
+
+<div class='slider'>
+    <div class="edge"></div>
+<ul class="slideContainer" id="money_start">
+        <li class="slideItem" >
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
+                quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+        </li>
+        <li class="slideItem">
+                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
+                tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim ven
+        </li>
+        <li class="slideItem">
+        	t non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+        </li>
+        <li class="slideItem">
+			 in culpa qui officia deserunt mollit anim id est laborum.
+        </li>
+</ul>
+</div>
+<script type="text/javascript" src="libs/jquery/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="libs/swiper.js"></script>
+<script type="text/javascript">
+	var nextVideo = ["video/3.webm"];
+	var TVC = document.getElementById('TVC');
+	var i=1;
+	TVC.onended = function(){
+	    TVC.src = nextVideo[i];
+	    if (i < nextVideo.length-1) {
+	    	i++;
+	    }else{
+	    	i=0;
+	    }
+	}
+
+
+
+	// polyfill
+	window.requestAnimationFrame = (function(){
+	  return  window.requestAnimationFrame       ||
+	          window.webkitRequestAnimationFrame ||
+	          window.mozRequestAnimationFrame    ||
+	          function( callback ){
+	            window.setTimeout(callback, 1000 / 60);
+	          };
+	})();
+
+	var speed = 70000;/*harus di buat flexible membaca panjang text*/
+	(function currencySlide(){
+	    var currencyPairWidth = $('.slideItem:first-child').outerWidth();
+	    $(".slideContainer").animate({marginLeft:-currencyPairWidth},speed, 'linear', function(){
+	                $(this).css({marginLeft:0}).find("li:last").after($(this).find("li:first"));
+	        });
+	        requestAnimationFrame(currencySlide);
+	})();
+
+
+	$(document).ready(function(){
+
+		$(document).on("contextmenu",function(e){
+	             e.preventDefault();
+	     });
+		$(document).on("click",function(e){
+	             e.preventDefault();
+	     });
+	});
+
+</script>
+  <script>
+    var swiper = new Swiper('.swiper-container',{
+    	autoplay: 2500,
+        autoplayDisableOnInteraction: false,
+        loop: true
+    });
+    </script>
+
+</body>
+</html>

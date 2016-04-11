@@ -1,0 +1,8 @@
+.login-box-wrapper{width: 100%;float:left;}
+	.login-box-container{width: 300px;margin: auto;margin-top: 100px;border: double 1px #eee;height: 280px;padding: 10px;}
+	.login-title{float:left;width: 100%;font-size: 20px;}
+	.login-control{float: left;width: 100%;margin-top: 10px;margin-bottom: 10px;}
+	.login-label{width: 30%;display: inline-block;float:left;}
+	.login-sepp{width: 5%;display: inline-block;float:left;}
+	.login-input{width: 65%;display: inline-block;float:left;}
+	.login-input-button{width: 100%;display: inline-block;float:left;}

